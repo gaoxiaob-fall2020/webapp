@@ -25,3 +25,4 @@ jobs:
     - name: Testing for api calls to user
       run: |
         python src/manage.py test users
+
