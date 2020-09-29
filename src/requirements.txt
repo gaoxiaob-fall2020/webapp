@@ -1,0 +1,13 @@
+asgiref==3.2.10
+autopep8==1.5.4
+bcrypt==3.2.0
+cffi==1.14.3
+Django==3.1.1
+djangorestframework==3.11.1
+mysqlclient==2.0.1
+pycodestyle==2.6.0
+pycparser==2.20
+pytz==2020.1
+six==1.15.0
+sqlparse==0.3.1
+toml==0.10.1
