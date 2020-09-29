@@ -3,7 +3,7 @@ name: User API Testing
 on: [pull_request]
 
 jobs:
-  build and test:
+  build_and_test:
 
     runs-on: ubuntu-latest
     strategy:
@@ -12,6 +12,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - run: pwd
+    - run: ls $(pwd)
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
