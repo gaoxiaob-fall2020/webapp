@@ -1,20 +1,21 @@
-from django.db import models
-from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 import uuid
+
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.db import models
 from django.utils import timezone
 
 
 class UserManager(BaseUserManager):
     def create(self, **args):
-        required_args = ['first_name', 'last_name', 'email_address', 'password'] 
-        for arg in required_args: 
+        required_args = ['first_name', 'last_name', 'username', 'password']
+        for arg in required_args:
             if arg not in args:
                 raise ValueError(f'User creation requires: {required_args}')
 
         user = self.model(
-            first_name = args['first_name'], 
-            last_name = args['last_name'],
-            email_address = self.normalize_email(args['email_address']),
+            first_name=args['first_name'],
+            last_name=args['last_name'],
+            username=self.normalize_email(args['username']),
         )
         user.set_password(args['password'])
         user.save(using=self._db)
@@ -32,8 +33,8 @@ class User(AbstractBaseUser):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     # password
-    email_address = models.EmailField(
-        max_length=255, 
+    username = models.EmailField(
+        max_length=255,
         unique=True,
     )
     account_created = models.DateTimeField(
@@ -47,7 +48,7 @@ class User(AbstractBaseUser):
 
     objects = UserManager()
 
-    USERNAME_FIELD = 'email_address'
+    USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['first_name', 'last_name']
 
     def has_perm(self, perm, obj=None):
@@ -61,5 +62,4 @@ class User(AbstractBaseUser):
         return self.is_admin
 
     def __str__(self):
-        return f'{self.email_address}'
-    
+        return f'{self.username}'
