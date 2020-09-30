@@ -1,6 +1,6 @@
 # webapp
 
-> Webapp is a cloud native web application that is being developed and maintained by gao.xiaob@northeastern.edu. It is for the couse learning of *CSYE6225 Network Structures and Cloud Computing*,  and functionality will be complete as new assignments come. *Django* and *Django REST* are main frameworks to support its development.
+> Webapp is a cloud native web application that is being developed and maintained by gao.xiaob@northeastern.edu. It is for the couse learning of *CSYE6225 Network Structures and Cloud Computing*, and functionality will be complete as future assignments come. *Django* and *Django REST* are main frameworks to support its development.
 
 ## Run in Local Development
 
@@ -38,6 +38,9 @@
 
     python manage.py runserver
 
+    # Run tests for assignment#2
+    python manage.py test users
+
 ## API Calls from Assignment#2
 
 #### Create a new user &#x25BE;
@@ -49,8 +52,8 @@
 
     first_name
     last_name
-    email_address      # unique as username
-    password
+    username      # username is a valid email address
+    password      # a valid password contains at least 9 characters with at least 1 uppercase letter, 1 number, and 1 special character in [@#?!+%]
 
 ###### SAMPLE RESPONSES
 
@@ -59,7 +62,7 @@
         "id": "a9e20616-b674-4e96-baf2-ec3d8814afcc",
         "first_name": "Xiaobin",
         "last_name": "Gao",
-        "email_address": "gao.xiaob@northeastern.edu",
+        "username": "gao.xiaob@northeastern.edu",
         "account_created": "2020-09-29T20:39:39.704706Z",
         "account_updated": "2020-09-29T20:39:39.704714Z"
     }
@@ -86,7 +89,7 @@
 ###### REQUEST PARAMETERS
 *Content-Type: application/json*
 
-    username       # user's email address
+    username      
     password
 
 ###### SAMPLE RESPONSE
@@ -98,7 +101,7 @@
 
 #### Get user information &#x25BE;
 
-    GET: /v1/user/<email_address>/
+    GET: /v1/user/self/
 
 ###### REQUEST PARAMETERS
 *Content-Type: application/json*
@@ -111,7 +114,7 @@
         "id": "a9e20616-b674-4e96-baf2-ec3d8814afcc",
         "first_name": "Xiaobin",
         "last_name": "Gao",
-        "email_address": "gao.xiaob@northeastern.edu",
+        "username": "gao.xiaob@northeastern.edu",
         "account_created": "2020-09-29T20:39:39.704706Z",
         "account_updated": "2020-09-29T20:39:39.704714Z"
     }
@@ -119,24 +122,25 @@
 
 #### Update user information &#x25BE;
 
-    PUT: /v1/user/<email_address>/
+    PUT: /v1/user/self/
 
 ###### REQUEST PARAMETERS
 *Content-Type: application/json*
     
     first_name
     last_name
-    email_address
+    username         # same username as that of the current authenticated user
     password
 
 ###### SAMPLE RESPONSES
     Status: 204 No Content
 
-    Status: 200 BAD Request
+    Status: 400 BAD Request
     {
-        "email_address": [
-            "User with that email already exists"
-        ]
+        "username": "Incorrect username.",
+        "account_created": "Unchangeable field.",
+        "account_updated": "Unchangeable field.",
+        "id": "Unchangeable field."
     }
 
     Status: 400 BAD Request
