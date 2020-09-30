@@ -1,27 +1,42 @@
-from rest_framework import serializers
+import re
+
 from django.contrib.auth import get_user_model
-from rest_framework.validators import UniqueValidator
+from django.core.exceptions import ValidationError
 from django.utils import timezone
+from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
 User = get_user_model()
+
+
+# Custom password validator
+def pwdValidator(pwd):
+    if len(pwd) <= 8:
+        raise ValidationError('Password must contain at least 9 characters.')
+    if not re.search('[A-Z]', pwd) or not re.search('[0-9]', pwd) or not re.search('[@#?!+%]', pwd):
+        raise ValidationError(
+            'Enter a password with at least 1 uppercase letter, 1 number, and 1 special character in [@#?!+%].'
+        )
 
 
 class UserSerializer(serializers.Serializer):
     id = serializers.UUIDField(read_only=True)
     first_name = serializers.CharField(max_length=50)
     last_name = serializers.CharField(max_length=50)
-    email_address = serializers.EmailField(
-        max_length=255, 
+    username = serializers.EmailField(
+        # read_only=True,
+        max_length=255,
         validators=[
             UniqueValidator(
-                queryset=User.objects.all(), 
+                queryset=User.objects.all(),
                 message='User with that email already exists'
             )
         ]
     )
     password = serializers.CharField(
         write_only=True,
-        max_length=128
+        max_length=128,
+        validators=[pwdValidator]
     )
     account_created = serializers.DateTimeField(read_only=True)
     account_updated = serializers.DateTimeField(read_only=True)
@@ -33,7 +48,7 @@ class UserSerializer(serializers.Serializer):
         instance.first_name = validated_data.get('first_name', instance.first_name)
         instance.last_name = validated_data.get('last_name', instance.last_name)
         instance.set_password(validated_data.get('password', instance.password))
-        instance.email_address = validated_data.get('email_address', instance.email_address)
+        instance.username = validated_data.get('username', instance.username)
         instance.account_updated = timezone.now()
         instance.save()
         return instance
