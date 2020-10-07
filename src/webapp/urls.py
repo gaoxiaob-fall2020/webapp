@@ -6,4 +6,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/token/', obtain_auth_token),
     path('v1/user/', include('users.urls')),
+    path('v1/', include('question_n_answer.urls')),
 ]
