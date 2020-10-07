@@ -29,6 +29,6 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --ignore=F401
     - name: Test api calls to user
       run: |
-        python src/manage.py test users
+        python src/manage.py test users question_n_answer
       env: 
         DEV_ENV: 0
