@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'users.apps.UsersConfig',
+    'question_n_answer.apps.QuestionNAnswerConfig'
 ]
 
 MIDDLEWARE = [
