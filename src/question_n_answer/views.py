@@ -1,13 +1,15 @@
-from django.shortcuts import render
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
-from .serializers import QuestionSerializer, AnswerSerializer
-from .models import Category, Question, Answer
-from django.urls import reverse
-from django.http import Http404
-from rest_framework import status
+# from django.shortcuts import render
 from django.core.exceptions import ValidationError
+from django.http import Http404
+from django.urls import reverse
+from rest_framework import status
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .models import Answer, Question
+from .serializers import AnswerSerializer, QuestionSerializer
 
 
 class QuestionList(APIView):
@@ -20,7 +22,7 @@ class QuestionList(APIView):
         qs = Question.objects.all()
         serializer = QuestionSerializer(qs, many=True)
         return Response(serializer.data)
-    
+
     # Post a new question
     def post(self, request):
         serializer = QuestionSerializer(data=request.data)
@@ -51,7 +53,12 @@ class QuestionDetail(APIView):
         q = self.get_q(question_id)
         serializer = QuestionSerializer(q, data=request.data)
         if q.user_id != request.user.id:
-            return Response({'Unauthorized': 'You are not allowed to update a question posted by others.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    'Unauthorized': 'You are not allowed to update a question posted by others.'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
         if not request.data:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         if serializer.is_valid():
@@ -63,16 +70,26 @@ class QuestionDetail(APIView):
     def delete(self, request, question_id):
         q = self.get_q(question_id)
         if q.user_id != request.user.id:
-            return Response({'Unauthorized': 'You\'re not allowed to delete a question posted by others.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    'Unauthorized': 'You\'re not allowed to delete a question posted by others.'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
         if q.answers.all():
-            return Response({'Unsupported': 'You\'re not allowed to delete a question that has already been answered.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    'Unsupported': 'You\'re not allowed to delete a question that has already been answered.'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
         q.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class AnswerList(APIView):
     permission_classes = [IsAuthenticated]
-    
+
     # Answer a question
     def post(self, request, question_id):
         try:
@@ -97,7 +114,7 @@ class AnswerDetail(APIView):
         except (Question.DoesNotExist, Answer.DoesNotExist, ValidationError):
             raise Http404
         return q, a
-    
+
     # Get a question's answer
     def get(self, request, question_id, answer_id):
         _, a = self.get_q_n_a(question_id, answer_id)
@@ -108,7 +125,12 @@ class AnswerDetail(APIView):
     def put(self, request, question_id, answer_id):
         _, a = self.get_q_n_a(question_id, answer_id)
         if a.user_id != request.user.id:
-            return Response({'Unauthorized': 'You\'re not allowed to update an answer that was posted by others.'}, status=status.HTTP_400_BAD_REQUEST) 
+            return Response(
+                {
+                    'Unauthorized': 'You\'re not allowed to update an answer that was posted by others.'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
         serializer = AnswerSerializer(a, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -119,6 +141,11 @@ class AnswerDetail(APIView):
     def delete(self, request, question_id, answer_id):
         _, a = self.get_q_n_a(question_id, answer_id)
         if a.user_id != request.user.id:
-            return Response({'Unauthorized': 'You\'re not allowed to delete an answer that was posted by others.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    'Unauthorized': 'You\'re not allowed to delete an answer that was posted by others.'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
         a.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

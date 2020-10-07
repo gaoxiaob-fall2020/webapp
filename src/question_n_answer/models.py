@@ -1,9 +1,11 @@
-from django.db import models
-from django.utils import timezone
-from django.contrib.auth import get_user_model
 import uuid
 
+from django.contrib.auth import get_user_model
+from django.db import models
+from django.utils import timezone
+
 User = get_user_model()
+
 
 class Category(models.Model):
     category_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -27,5 +29,3 @@ class Answer(models.Model):
     updated_timestamp = models.DateTimeField(auto_now=timezone.now)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     answer_text = models.TextField()
-
-

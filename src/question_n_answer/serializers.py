@@ -1,9 +1,11 @@
-from rest_framework import serializers
-from .models import Category, Question, Answer
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from rest_framework import serializers
+
+from .models import Answer, Category, Question
 
 User = get_user_model()
+
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,18 +17,12 @@ class AnswerSerializer(serializers.ModelSerializer):
     question_id = serializers.PrimaryKeyRelatedField(source='question', queryset=Question.objects.all(), required=False)
     user_id = serializers.PrimaryKeyRelatedField(source='user', queryset=User.objects.all(), required=False)
 
-    class Meta: 
+    class Meta:
         model = Answer
         fields = ('answer_id', 'question_id', 'created_timestamp', 'updated_timestamp', 'user_id', 'answer_text')
         # extra_kwargs = {
         #     'question': {'required': False}
         # }
- 
-    # def update(self, instance, validated_data):
-    #     instance.answer_text = validated_data.get('answer_text', instance.answer_text)
-    #     instance.updated_timestamp = timezone.now()
-    #     instance.save()
-    #     return instance    
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -46,7 +42,7 @@ class QuestionSerializer(serializers.ModelSerializer):
         categories = validated_data.pop('categories', {})
         answers = validated_data.pop('answers', {})
         q = Question.objects.create(**validated_data)
-        for v in categories: 
+        for v in categories:
             if Category.objects.filter(category=v['category']):
                 category = Category.objects.filter(category=v['category'])[0]
                 category.questions.add(q)
@@ -65,7 +61,7 @@ class QuestionSerializer(serializers.ModelSerializer):
         if categories:
             instance.categories.clear()
             instance.save()
-            for v in categories: 
+            for v in categories:
                 if Category.objects.filter(category=v['category']):
                     category = Category.objects.filter(category=v['category'])[0]
                     category.questions.add(instance)
@@ -76,6 +72,3 @@ class QuestionSerializer(serializers.ModelSerializer):
             instance.updated_timestamp = timezone.now()
             instance.save()
         return instance
-
-
-
