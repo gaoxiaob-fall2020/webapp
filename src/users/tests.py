@@ -1,3 +1,4 @@
+import base64
 import json
 
 from django.contrib.auth import get_user_model
@@ -25,8 +26,13 @@ test_user2 = {
 
 def auth_user_setup(self, user1=True):
     user = User.objects.create(**test_user1) if user1 else User.objects.create(**test_user2)
-    auth_token = Token.objects.create(user=user)
-    self.client.credentials(HTTP_AUTHORIZATION=f'Token {auth_token.key}')
+    # auth_token = Token.objects.create(user=user)
+    # self.client.credentials(HTTP_AUTHORIZATION=f'Token {auth_token.key}')
+    if user1:
+        auth_basic = f'{test_user1["username"]}:{test_user1["password"]}'
+    else:
+        auth_basic = f'{test_user2["username"]}:{test_user2["password"]}'
+    self.client.credentials(HTTP_AUTHORIZATION=f'Basic {base64.b64encode(auth_basic.encode()).decode()}')
     return user
 
 

@@ -1,3 +1,5 @@
+import base64
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -56,11 +58,16 @@ test_answer2 = {
 }
 
 
-def auth_user_setup(self, user=None):
+def auth_user_setup(self, user1=None):
     user = User.objects.create(
-        **test_user) if not user else User.objects.create(**user)
-    auth_token = Token.objects.create(user=user)
-    self.client.credentials(HTTP_AUTHORIZATION=f'Token {auth_token.key}')
+        **test_user) if not user1 else User.objects.create(**user1)
+    # auth_token = Token.objects.create(user=user)
+    # self.client.credentials(HTTP_AUTHORIZATION=f'Token {auth_token.key}')
+    if not user1:
+        auth_basic = f'{test_user["username"]}:{test_user["password"]}'
+    else:
+        auth_basic = f'{test_user2["username"]}:{test_user2["password"]}'
+    self.client.credentials(HTTP_AUTHORIZATION=f'Basic {base64.b64encode(auth_basic.encode()).decode()}')
     return user
 
 
