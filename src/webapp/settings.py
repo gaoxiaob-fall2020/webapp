@@ -159,4 +159,4 @@ REST_FRAMEWORK = {
     ]
 }
 
-AWS_S3_BUCKET = os.environ['AWS_S3_BUCKET']
+AWS_S3_BUCKET = os.environ.get('AWS_S3_BUCKET')
