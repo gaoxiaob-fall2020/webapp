@@ -26,7 +26,15 @@ class AnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Answer
-        fields = ('answer_id', 'question_id', 'created_timestamp', 'updated_timestamp', 'user_id', 'answer_text', 'attachments')
+        fields = (
+            'answer_id',
+            'question_id',
+            'created_timestamp',
+            'updated_timestamp',
+            'user_id',
+            'answer_text',
+            'attachments'
+        )
         # extra_kwargs = {
         #     'question': {'required': False}
         # }
@@ -40,7 +48,8 @@ class QuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Question
-        fields = ['question_id', 'created_timestamp', 'updated_timestamp', 'user_id', 'question_text', 'categories', 'answers', 'attachments']
+        fields = ['question_id', 'created_timestamp', 'updated_timestamp',
+                  'user_id', 'question_text', 'categories', 'answers', 'attachments']
         # extra_kwargs = {
         #     'categories': {'allow_empty': True}
         # }\
@@ -59,19 +68,22 @@ class QuestionSerializer(serializers.ModelSerializer):
                 category.questions.add(q)
             category.save()
         for v in answers:
-            Answer.objects.create(answer_text=v['answer_text'], user_id=user_id, question_id=q.pk)
+            Answer.objects.create(
+                answer_text=v['answer_text'], user_id=user_id, question_id=q.pk)
 
         return q
 
     def update(self, instance, validated_data):
-        instance.question_text = validated_data.get('question_text', instance.question_text)
+        instance.question_text = validated_data.get(
+            'question_text', instance.question_text)
         categories = validated_data.pop('categories', {})
         if categories:
             instance.categories.clear()
             instance.save()
             for v in categories:
                 if Category.objects.filter(category=v['category']):
-                    category = Category.objects.filter(category=v['category'])[0]
+                    category = Category.objects.filter(
+                        category=v['category'])[0]
                     category.questions.add(instance)
                 else:
                     category = Category.objects.create(category=v['category'])

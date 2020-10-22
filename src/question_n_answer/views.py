@@ -240,9 +240,7 @@ class FileList(APIView):
                 {'Detail': "The question, the answer, and the file don\'t match."},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
         obj = s3.Object(settings.AWS_S3_BUCKET, f.s3_object_name)
         obj.delete()
         f.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-        
