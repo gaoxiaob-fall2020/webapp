@@ -142,7 +142,7 @@ class ResponseContentTestCase(APITestCase):
         response = self.client.post(
             reverse('post_a_question'), data=test_question_cp)
         resp_payload = response.json()
-        self.assertEqual(len(resp_payload), 7)
+        self.assertEqual(len(resp_payload), 8)
         for arg in (
             'question_id', 'created_timestamp', 'updated_timestamp', 'user_id', 'question_text', 'categories', 'answers'
         ):
@@ -154,7 +154,7 @@ class ResponseContentTestCase(APITestCase):
         response = self.client.post(reverse('post_an_answer', kwargs={
                                     'question_id': q.question_id}), data=test_answer)
         resp_payload = response.json()
-        self.assertEqual(len(resp_payload), 6)
+        self.assertEqual(len(resp_payload), 7)
         for arg in (
             'answer_id', 'question_id', 'created_timestamp', 'updated_timestamp', 'user_id', 'answer_text'
         ):
@@ -200,7 +200,7 @@ class ResponseContentTestCase(APITestCase):
         response = self.client.get(reverse('get_put_del_an_answer', kwargs={
                                    'question_id': q.question_id, 'answer_id': a.answer_id}))
         resp_payload = response.json()
-        self.assertEqual(len(resp_payload), 6)
+        self.assertEqual(len(resp_payload), 7)
         for arg in ('answer_id', 'question_id', 'created_timestamp', 'updated_timestamp', 'user_id', 'answer_text'):
             self.assertTrue(arg in resp_payload)
 

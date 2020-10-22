@@ -26,7 +26,7 @@ SECRET_KEY = '&t7)nppw+r8^xqey#0sg60f8=l51#-x0-&foku-1el09fpxy*o'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [os.environ.get('HOST_ADDR')] if os.environ.get('HOST_ADDR') else []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -158,3 +158,5 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
     ]
 }
+
+AWS_S3_BUCKET = os.environ['AWS_S3_BUCKET']
