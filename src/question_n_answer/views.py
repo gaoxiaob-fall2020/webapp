@@ -1,6 +1,8 @@
 # from django.shortcuts import render
+import boto3
+from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.permissions import (IsAuthenticated,
@@ -8,8 +10,32 @@ from rest_framework.permissions import (IsAuthenticated,
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Answer, Question
-from .serializers import AnswerSerializer, QuestionSerializer
+from .models import Answer, File, Question
+from .serializers import QuestionSerializer, AnswerSerializer, FileSerializer
+
+
+def get_q(question_id):
+    try:
+        q = Question.objects.get(pk=question_id)
+    except (Question.DoesNotExist, ValidationError):
+        raise Http404
+    return q
+
+
+def get_a(answer_id):
+    try:
+        a = Answer.objects.get(pk=answer_id)
+    except (Answer.DoesNotExist, ValidationError):
+        raise Http404
+    return a
+
+
+def get_f(file_id):
+    try:
+        f = File.objects.get(pk=file_id)
+    except (File.DoesNotExist, ValidationError):
+        raise Http404
+    return f
 
 
 class QuestionList(APIView):
@@ -35,22 +61,22 @@ class QuestionList(APIView):
 class QuestionDetail(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-    def get_q(self, question_id):
-        try:
-            q = Question.objects.get(pk=question_id)
-        except (Question.DoesNotExist, ValidationError):
-            raise Http404
-        return q
+    # def get_q(self, question_id):
+    #     try:
+    #         q = Question.objects.get(pk=question_id)
+    #     except (Question.DoesNotExist, ValidationError):
+    #         raise Http404
+    #     return q
 
     # Get a question
     def get(self, request, question_id):
-        q = self.get_q(question_id)
+        q = get_q(question_id)
         serializer = QuestionSerializer(q)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     # Update a question
     def put(self, request, question_id):
-        q = self.get_q(question_id)
+        q = get_q(question_id)
         serializer = QuestionSerializer(q, data=request.data)
         if q.user_id != request.user.id:
             return Response(
@@ -68,7 +94,7 @@ class QuestionDetail(APIView):
 
     # Delete a question
     def delete(self, request, question_id):
-        q = self.get_q(question_id)
+        q = get_q(question_id)
         if q.user_id != request.user.id:
             return Response(
                 {
@@ -148,4 +174,73 @@ class AnswerDetail(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         a.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FileList(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, question_id=None, answer_id=None):
+        if not request.data.get('file') or request.data.get('file').name.rsplit('.', 1)[-1] not in ('png', 'jpg', 'jpeg'):
+            return Response(
+                {'Detail': 'No image of .png, .jpg, or .jpeg found.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        q = get_q(question_id)
+        a = get_a(answer_id) if answer_id else None
+        f = request.data.get('file')
+        s3 = boto3.resource('s3')
+
+        if q.user.id != request.user.id:
+            return Response(
+                {'Detail': 'You\'re not the author of the question/answer.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not a:
+            img = File(file_name=f.name, question=q)
+            img.s3_object_name = f'{question_id}/{img.pk}/{f.name}'
+
+            s3.Bucket(settings.AWS_S3_BUCKET).put_object(
+                Key=img.s3_object_name, Body=f)
+            img.save()
+            return Response(FileSerializer(img).data, status=status.HTTP_201_CREATED)
+
+        # Attach an image file to an answer
+        if str(a.question.pk) != question_id:
+            return Response(
+                {'Detail': "The answer and the question don\'t match."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        img = File(file_name=f.name, question=q, answer=a)
+        img.s3_object_name = f'{answer_id}/{img.pk}/{f.name}'
+        s3.Bucket(settings.AWS_S3_BUCKET).put_object(
+            Key=img.s3_object_name, Body=f)
+        img.save()
+        return Response(FileSerializer(img).data, status=status.HTTP_201_CREATED)
+
+    def delete(self, request, file_id, question_id=None, answer_id=None):
+        q = get_q(question_id)
+        a = get_a(answer_id) if answer_id else None
+        f = get_f(file_id)
+        s3 = boto3.resource('s3')
+
+        if q.user.id != request.user.id:
+            return Response(
+                {'Detail': 'You\'re not the author of the question/answer.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Delete an image file from a question/an answer
+        if a and (str(a.question.pk) != question_id or str(f.answer.pk) != answer_id):
+            print(str(f.pk) != file_id)
+            print(a.question.pk, f.pk, file_id)
+            return Response(
+                {'Detail': "The question, the answer, and the file don\'t match."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        obj = s3.Object(settings.AWS_S3_BUCKET, f.s3_object_name)
+        obj.delete()
+        f.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

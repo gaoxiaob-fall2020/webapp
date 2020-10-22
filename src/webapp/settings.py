@@ -26,7 +26,7 @@ SECRET_KEY = '&t7)nppw+r8^xqey#0sg60f8=l51#-x0-&foku-1el09fpxy*o'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -152,9 +152,11 @@ PASSWORD_HASHERS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication'
+        'rest_framework.authentication.BasicAuthentication'
     ],
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
     ]
 }
+
+AWS_S3_BUCKET = os.environ.get('AWS_S3_BUCKET')

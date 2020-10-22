@@ -1,3 +1,5 @@
+import base64
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -56,11 +58,16 @@ test_answer2 = {
 }
 
 
-def auth_user_setup(self, user=None):
+def auth_user_setup(self, user1=None):
     user = User.objects.create(
-        **test_user) if not user else User.objects.create(**user)
-    auth_token = Token.objects.create(user=user)
-    self.client.credentials(HTTP_AUTHORIZATION=f'Token {auth_token.key}')
+        **test_user) if not user1 else User.objects.create(**user1)
+    # auth_token = Token.objects.create(user=user)
+    # self.client.credentials(HTTP_AUTHORIZATION=f'Token {auth_token.key}')
+    if not user1:
+        auth_basic = f'{test_user["username"]}:{test_user["password"]}'
+    else:
+        auth_basic = f'{test_user2["username"]}:{test_user2["password"]}'
+    self.client.credentials(HTTP_AUTHORIZATION=f'Basic {base64.b64encode(auth_basic.encode()).decode()}')
     return user
 
 
@@ -135,7 +142,7 @@ class ResponseContentTestCase(APITestCase):
         response = self.client.post(
             reverse('post_a_question'), data=test_question_cp)
         resp_payload = response.json()
-        self.assertEqual(len(resp_payload), 7)
+        self.assertEqual(len(resp_payload), 8)
         for arg in (
             'question_id', 'created_timestamp', 'updated_timestamp', 'user_id', 'question_text', 'categories', 'answers'
         ):
@@ -147,7 +154,7 @@ class ResponseContentTestCase(APITestCase):
         response = self.client.post(reverse('post_an_answer', kwargs={
                                     'question_id': q.question_id}), data=test_answer)
         resp_payload = response.json()
-        self.assertEqual(len(resp_payload), 6)
+        self.assertEqual(len(resp_payload), 7)
         for arg in (
             'answer_id', 'question_id', 'created_timestamp', 'updated_timestamp', 'user_id', 'answer_text'
         ):
@@ -193,7 +200,7 @@ class ResponseContentTestCase(APITestCase):
         response = self.client.get(reverse('get_put_del_an_answer', kwargs={
                                    'question_id': q.question_id, 'answer_id': a.answer_id}))
         resp_payload = response.json()
-        self.assertEqual(len(resp_payload), 6)
+        self.assertEqual(len(resp_payload), 7)
         for arg in ('answer_id', 'question_id', 'created_timestamp', 'updated_timestamp', 'user_id', 'answer_text'):
             self.assertTrue(arg in resp_payload)
 

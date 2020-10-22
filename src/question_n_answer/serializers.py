@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from rest_framework import serializers
 
-from .models import Answer, Category, Question
+from .models import Answer, Category, Question, File
 
 User = get_user_model()
 
@@ -13,13 +13,28 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class FileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = File
+        fields = ('file_id', 'file_name', 's3_object_name', 'created_date')
+
+
 class AnswerSerializer(serializers.ModelSerializer):
-    question_id = serializers.PrimaryKeyRelatedField(source='question', queryset=Question.objects.all(), required=False)
-    user_id = serializers.PrimaryKeyRelatedField(source='user', queryset=User.objects.all(), required=False)
+    # question_id = serializers.PrimaryKeyRelatedField(source='question', queryset=Question.objects.all(), required=False)
+    # user_id = serializers.PrimaryKeyRelatedField(source='user', queryset=User.objects.all(), required=False)
+    attachments = FileSerializer(many=True, read_only=True)
 
     class Meta:
         model = Answer
-        fields = ('answer_id', 'question_id', 'created_timestamp', 'updated_timestamp', 'user_id', 'answer_text')
+        fields = (
+            'answer_id',
+            'question_id',
+            'created_timestamp',
+            'updated_timestamp',
+            'user_id',
+            'answer_text',
+            'attachments'
+        )
         # extra_kwargs = {
         #     'question': {'required': False}
         # }
@@ -28,11 +43,13 @@ class AnswerSerializer(serializers.ModelSerializer):
 class QuestionSerializer(serializers.ModelSerializer):
     categories = CategorySerializer(many=True, required=False)
     answers = AnswerSerializer(many=True, required=False)
-    user_id = serializers.PrimaryKeyRelatedField(source='user', queryset=User.objects.all(), required=False)
+    # user_id = serializers.PrimaryKeyRelatedField(source='user', queryset=User.objects.all(), required=False)
+    attachments = FileSerializer(many=True, read_only=True)
 
     class Meta:
         model = Question
-        fields = ['question_id', 'created_timestamp', 'updated_timestamp', 'user_id', 'question_text', 'categories', 'answers']
+        fields = ['question_id', 'created_timestamp', 'updated_timestamp',
+                  'user_id', 'question_text', 'categories', 'answers', 'attachments']
         # extra_kwargs = {
         #     'categories': {'allow_empty': True}
         # }\
@@ -51,19 +68,22 @@ class QuestionSerializer(serializers.ModelSerializer):
                 category.questions.add(q)
             category.save()
         for v in answers:
-            Answer.objects.create(answer_text=v['answer_text'], user_id=user_id, question_id=q.pk)
+            Answer.objects.create(
+                answer_text=v['answer_text'], user_id=user_id, question_id=q.pk)
 
         return q
 
     def update(self, instance, validated_data):
-        instance.question_text = validated_data.get('question_text', instance.question_text)
+        instance.question_text = validated_data.get(
+            'question_text', instance.question_text)
         categories = validated_data.pop('categories', {})
         if categories:
             instance.categories.clear()
             instance.save()
             for v in categories:
                 if Category.objects.filter(category=v['category']):
-                    category = Category.objects.filter(category=v['category'])[0]
+                    category = Category.objects.filter(
+                        category=v['category'])[0]
                     category.questions.add(instance)
                 else:
                     category = Category.objects.create(category=v['category'])

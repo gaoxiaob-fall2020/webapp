@@ -149,5 +149,57 @@
             "This field is required."
         ]
     }
-# demo
-# test
+
+## API Calls from Assignment#3, #4, #5
+
+#### Get all questions &#x25BE;
+
+    GET: /v1/questions/
+
+#### GET a question &#x25BE;
+
+    GET: /v1/question/<question_id>/
+
+#### Post a question &#x25BE;
+
+    POST: /v1/question/
+
+#### Update a question &#x25BE;
+
+    PUT: /v1/question/<question_id>/
+
+#### Delete a question &#x25BE;
+
+    DELETE: /v1/question/<question_id>/
+
+#### Get an answer &#x25BE;
+
+    GET: /v1/question/<question_id>/answer/<answer_id>/
+
+#### Post an answer &#x25BE;
+
+    POST: /v1/question/<question_id>/answer/
+
+#### Update an answer &#x25BE;
+
+    Put: /v1/question/<question_id>/answer/<answer_id>/
+
+#### Delete an answer &#x25BE;
+
+    DELETE: /v1/question/<question_id>/answer/<answer_id>/
+
+#### Upload an image file to a question &#x25BE;
+
+    POST: /v1/question/<question_id>/file/
+
+#### Delete an image file from a question &#x25BE;
+
+    DELETE: /v1/question/<question_id>/file/<file_id>/
+
+#### Upload an image file to an answer &#x25BE;
+
+    POST: /v1/question/<question_id>/answer/<answer_id>/file/
+
+#### Delete an image file from an answer &#x25BE;
+
+    DELETE: /v1/question/<question_id>/answer/<answer_id>/file/<file_id>/

@@ -29,3 +29,15 @@ class Answer(models.Model):
     updated_timestamp = models.DateTimeField(auto_now=timezone.now)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     answer_text = models.TextField()
+
+
+class File(models.Model):
+    file_id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    file_name = models.CharField(max_length=100)
+    s3_object_name = models.CharField(max_length=200)
+    created_date = models.DateTimeField(auto_now_add=timezone.now)
+    question = models.ForeignKey(Question, related_name="attachments", null=True, on_delete=models.CASCADE)
+    answer = models.ForeignKey(Answer, related_name="attachments", null=True, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.file_name
