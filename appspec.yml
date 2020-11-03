@@ -7,10 +7,10 @@ files:
     destination: /home/ubuntu/app
 
 hooks:
-  # ApplicationStop:
-  #   - location: ./codedeploy/app_stop.sh
-  #     timeout: 100
-  #     runas: ubuntu
+  ApplicationStop:
+    - location: ./codedeploy/app_stop.sh
+      timeout: 100
+      runas: ubuntu
 
   BeforeInstall:
     - location: ./codedeploy/b4_install.sh
@@ -19,5 +19,5 @@ hooks:
 
   ApplicationStart:
     - location: ./codedeploy/app_start.sh
-      timeout: 300
+      timeout: 600
       runas: ubuntu
