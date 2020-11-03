@@ -1,4 +1,4 @@
 #!/bin/bash
 
 # Remove previous artifact
-if [ -d ~/app/src ]; then rm -rf ~/app/src; fi 
+# if [ -d ~/app ]; then sudo rm -rf ~/app; fi 
