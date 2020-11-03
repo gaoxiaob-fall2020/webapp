@@ -1,0 +1,20 @@
+---
+name: Build & Deploy
+
+env:
+  ARTIFACT_NAME: csye-webapp-${{ github.run_number }}.zip
+  CODEDEPLOY_APP_NAME: csye6225-webapp
+  CODEDEPLOY_DEPLOY_GROUP_NAME: csye6225-webapp-deployment
+
+on:
+  push:
+  #  branches: [ master ]
+
+jobs:
+  ci_cd:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+    
+      - name: Checkout
+        run: pwd; ls -l
