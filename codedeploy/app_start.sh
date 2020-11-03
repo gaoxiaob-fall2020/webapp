@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd ~/app/src
+cd ~/app
 
 # Install dependecies
 pip3 install -r requirements.txt
