@@ -9,15 +9,15 @@ files:
 hooks:
   ApplicationStop:
     - location: ./codedeploy/app_stop.sh
-      timeout: 100
-      runas: root
+      timeout: 120
+      runas: ubuntu
 
   BeforeInstall:
     - location: ./codedeploy/b4_install.sh
-      timeout: 100
-      runas: root
+      timeout: 120
+      runas: ubuntu
 
   ApplicationStart:
     - location: ./codedeploy/app_start.sh
-      timeout: 1200
-      runas: root
+      timeout: 600
+      runas: ubuntu
