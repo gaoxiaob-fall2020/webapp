@@ -18,8 +18,11 @@ class Migration(migrations.Migration):
                 ('file_name', models.CharField(max_length=100)),
                 ('s3_object_name', models.CharField(max_length=200)),
                 ('created_data', models.DateTimeField(auto_now_add=True)),
-                ('Question', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='images', to='question_n_answer.question')),
-                ('answer', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='images', to='question_n_answer.answer')),
+                ('Question', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE,
+                                               related_name='images', to='question_n_answer.question')),
+                ('answer', models.ForeignKey(null=True,
+                                             on_delete=django.db.models.deletion.CASCADE,
+                                             related_name='images', to='question_n_answer.answer')),
             ],
         ),
     ]
