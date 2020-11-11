@@ -10,5 +10,6 @@ sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
     -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json \
     -s
 
-sudo touch /opt/aws/amazon-cloudwatch-agent/logs/webapp.log
+# sudo touch /opt/aws/amazon-cloudwatch-agent/logs/webapp.log
+sleep 30
 sudo chown ubuntu:ubuntu /opt/aws/amazon-cloudwatch-agent/logs/webapp.log
