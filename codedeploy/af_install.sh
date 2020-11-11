@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Setup AWS CloudWatch
-sudo cp /home/ubuntu/app/cloudwatch/amazon-cloudwatch-agent.json \
+sudo cp /home/ubuntu/cloudwatch/amazon-cloudwatch-agent.json \
 /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
 
 sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \

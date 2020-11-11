@@ -5,6 +5,8 @@ os: linux
 files:
   - source: ./src
     destination: /home/ubuntu/app
+  - source: ./cloudwatch
+    destination: /home/ubuntu/cloudwatch
 
 hooks:
   ApplicationStop:
