@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.http import Http404, JsonResponse
 from django.urls import reverse
+from django_statsd.clients import statsd
 from rest_framework import status
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
@@ -11,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Answer, File, Question
-from .serializers import QuestionSerializer, AnswerSerializer, FileSerializer
+from .serializers import AnswerSerializer, FileSerializer, QuestionSerializer
 
 
 def get_q(question_id):
@@ -43,9 +44,7 @@ class QuestionList(APIView):
 
     # Get all questions
     def get(self, request):
-        from statsd import StatsClient
-        statsd = StatsClient()
-        statsd.incr('some.test.count') 
+        statsd.incr('view_question_n_answer_views_QuestionList_GET')
         if request.path_info == reverse('post_a_question'):
             raise Http404
         qs = Question.objects.all()
@@ -54,6 +53,7 @@ class QuestionList(APIView):
 
     # Post a new question
     def post(self, request):
+        statsd.incr('view_question_n_answer_views_QuestionList_POST')
         serializer = QuestionSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(user_id=request.user.pk)
@@ -73,12 +73,14 @@ class QuestionDetail(APIView):
 
     # Get a question
     def get(self, request, question_id):
+        statsd.incr('view_question_n_answer_views_QuestionDetail_GET')
         q = get_q(question_id)
         serializer = QuestionSerializer(q)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     # Update a question
     def put(self, request, question_id):
+        statsd.incr('view_question_n_answer_views_QuestionDetail_PUT')
         q = get_q(question_id)
         serializer = QuestionSerializer(q, data=request.data)
         if q.user_id != request.user.id:
@@ -97,6 +99,7 @@ class QuestionDetail(APIView):
 
     # Delete a question
     def delete(self, request, question_id):
+        statsd.incr('view_question_n_answer_views_QuestionDetail_DELETE')
         q = get_q(question_id)
         if q.user_id != request.user.id:
             return Response(
@@ -121,6 +124,7 @@ class AnswerList(APIView):
 
     # Answer a question
     def post(self, request, question_id):
+        statsd.incr('view_question_n_answer_views_AnswerList_POST')
         try:
             q = Question.objects.get(pk=question_id)
         except (Question.DoesNotExist, ValidationError):
@@ -146,12 +150,14 @@ class AnswerDetail(APIView):
 
     # Get a question's answer
     def get(self, request, question_id, answer_id):
+        statsd.incr('view_question_n_answer_views_AnswerDetail_GET')
         _, a = self.get_q_n_a(question_id, answer_id)
         serializer = AnswerSerializer(a)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     # Update a question's answer
     def put(self, request, question_id, answer_id):
+        statsd.incr('view_question_n_answer_views_AnswerDetail_PUT')
         _, a = self.get_q_n_a(question_id, answer_id)
         if a.user_id != request.user.id:
             return Response(
@@ -168,6 +174,7 @@ class AnswerDetail(APIView):
 
     # Delete a question's answer
     def delete(self, request, question_id, answer_id):
+        statsd.incr('view_question_n_answer_views_AnswerDetail_DELETE')
         _, a = self.get_q_n_a(question_id, answer_id)
         if a.user_id != request.user.id:
             return Response(
@@ -184,6 +191,7 @@ class FileList(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, question_id=None, answer_id=None):
+        statsd.incr('view_question_n_answer_views_FileList_POST')
         if not request.data.get('file') or request.data.get('file').name.rsplit('.', 1)[-1] not in ('png', 'jpg', 'jpeg'):
             return Response(
                 {'Detail': 'No image of .png, .jpg, or .jpeg found.'},
@@ -224,6 +232,7 @@ class FileList(APIView):
         return Response(FileSerializer(img).data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, file_id, question_id=None, answer_id=None):
+        statsd.incr('view_question_n_answer_views_FileList_DELETE')
         q = get_q(question_id)
         a = get_a(answer_id) if answer_id else None
         f = get_f(file_id)
