@@ -167,12 +167,11 @@ STATSD_CLIENT = 'django_statsd.clients.normal'
 
 MIDDLEWARE = [
     'django_statsd.middleware.GraphiteRequestTimingMiddleware',
-    'django_statsd.middleware.GraphiteMiddleware',
-    
+    'django_statsd.middleware.GraphiteMiddleware'
 ] + MIDDLEWARE
 
 STATSD_PATCHES = [
-        'django_statsd.patches.db',
+    'django_statsd.patches.db',
 ]
 
 

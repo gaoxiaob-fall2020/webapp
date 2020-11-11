@@ -26,8 +26,8 @@ class UserList(APIView):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()  # <created()> is being called
-            logger.info(serializer.data.get('username') +
-                        ' was successfully created.')
+            logger.info(
+                f'{serializer.data.get("username")} was successfully created.')
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
