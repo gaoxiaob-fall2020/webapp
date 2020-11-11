@@ -203,3 +203,5 @@
 #### Delete an image file from an answer &#x25BE;
 
     DELETE: /v1/question/<question_id>/answer/<answer_id>/file/<file_id>/
+
+demo6
