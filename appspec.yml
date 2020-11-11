@@ -17,6 +17,11 @@ hooks:
       timeout: 120
       runas: ubuntu
 
+  AfterInstall:
+    - location: ./codedeploy/af_install.sh
+      timeout: 120
+      runas: ubuntu
+
   ApplicationStart:
     - location: ./codedeploy/app_start.sh
       timeout: 600

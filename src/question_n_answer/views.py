@@ -43,6 +43,9 @@ class QuestionList(APIView):
 
     # Get all questions
     def get(self, request):
+        from statsd import StatsClient
+        statsd = StatsClient()
+        statsd.incr('some.test.count') 
         if request.path_info == reverse('post_a_question'):
             raise Http404
         qs = Question.objects.all()

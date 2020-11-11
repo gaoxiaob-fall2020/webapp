@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.auth import get_user_model
 from django.http import Http404
 # from django.shortcuts import render
@@ -11,6 +13,8 @@ from .serializers import UserSerializer
 
 User = get_user_model()
 
+# logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s')
+logger = logging.getLogger(f'django.{__name__}')
 
 class UserList(APIView):
 
@@ -19,6 +23,7 @@ class UserList(APIView):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()  # <created()> is being called
+            logger.info(serializer.data.get('username') + ' was successfully created.')
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

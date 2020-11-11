@@ -23,7 +23,7 @@ jobs:
       - name: Build deployment artifact
         run: |
           mkdir codedeploy_artifact
-          zip -r ${{ env.ARTIFACT_NAME }} src codedeploy/*.sh appspec.yml
+          zip -r ${{ env.ARTIFACT_NAME }} src codedeploy/*.sh appspec.yml cloudwatch/*.json
           mv ${{ env.ARTIFACT_NAME }} codedeploy_artifact
 
       - name: Configure AWS credentials
