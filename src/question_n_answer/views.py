@@ -1,4 +1,6 @@
 # from django.shortcuts import render
+import time
+
 import boto3
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -212,9 +214,10 @@ class FileList(APIView):
         if not a:
             img = File(file_name=f.name, question=q)
             img.s3_object_name = f'{question_id}/{img.pk}/{f.name}'
-
+            s_t = time.time()
             s3.Bucket(settings.AWS_S3_BUCKET).put_object(
                 Key=img.s3_object_name, Body=f)
+            statsd.timing('s3_views_question_n_answer_FileList_question_PUT', (time.time() - s_t) * 1000)
             img.save()
             return Response(FileSerializer(img).data, status=status.HTTP_201_CREATED)
 
@@ -226,8 +229,10 @@ class FileList(APIView):
             )
         img = File(file_name=f.name, question=q, answer=a)
         img.s3_object_name = f'{answer_id}/{img.pk}/{f.name}'
+        s_t = time.time()
         s3.Bucket(settings.AWS_S3_BUCKET).put_object(
             Key=img.s3_object_name, Body=f)
+        statsd.timing('s3_views_question_n_answer_FileList_answer_PUT', (time.time() - s_t) * 1000)
         img.save()
         return Response(FileSerializer(img).data, status=status.HTTP_201_CREATED)
 
@@ -252,7 +257,12 @@ class FileList(APIView):
                 {'Detail': "The question, the answer, and the file don\'t match."},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        s_t = time.time()
         obj = s3.Object(settings.AWS_S3_BUCKET, f.s3_object_name)
+        if not answer_id:
+            statsd.timing('s3_views_question_n_answer_FileList_question_DELETE', (time.time() - s_t) * 1000)
+        else:
+            statsd.timing('s3_views_question_n_answer_FileList_answer_DELETE', (time.time() - s_t) * 1000)
         obj.delete()
         f.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
