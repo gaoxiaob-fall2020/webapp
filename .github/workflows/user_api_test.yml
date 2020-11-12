@@ -29,10 +29,10 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --ignore=F401
     - name: Test api calls to user
       run: |
-        mkdir src/webapp/logs
-        touch src/webapp/logs/webapp.log
+        mkdir src/logs
+        touch src/logs/webapp.log
         python src/manage.py test users question_n_answer
       env: 
         DEV_ENV: 0
         LOGGING_LEVEL: DEBUG
-        LOGGING_FILE_PATH: logs/webapp.log
+        LOGGING_FILE_PATH: src/logs/webapp.log
