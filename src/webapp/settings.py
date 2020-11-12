@@ -94,7 +94,10 @@ else:
             'USER': os.environ['MYSQL_UNAME'],
             'PASSWORD': os.environ['MYSQL_PWD'],
             'HOST': os.environ['MYSQL_HOST'],
-            'PORT': os.environ['MYSQL_PORT']
+            'PORT': os.environ['MYSQL_PORT'],
+            'OPTIONS': {
+                'sql_mode': 'traditional',
+            }
         }
     }
 

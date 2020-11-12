@@ -6,7 +6,7 @@ cd /home/ubuntu/app
 pip3 install -r requirements.txt
 
 # Make migrations to the database
-# python3 manage.py makemigrations
+python3 manage.py makemigrations
 python3 manage.py migrate
 
 # Run the application
