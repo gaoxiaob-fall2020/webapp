@@ -1,4 +1,6 @@
 #!/bin/bash
 
 # Remove previous artifact
-if [ -d /home/ubuntu/app ]; then sudo rm -rf /home/ubuntu/app; fi 
+sudo rm -rf /home/ubuntu/app
+sudo rm -rf /home/ubuntu/cloudwatch
+sudo rm -f /etc/nginx/sites-available/dp_ng.conf

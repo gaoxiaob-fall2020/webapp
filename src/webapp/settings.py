@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'users.apps.UsersConfig',
-    'question_n_answer.apps.QuestionNAnswerConfig'
+    'question_n_answer.apps.QuestionNAnswerConfig',
+    'django_statsd'
 ]
 
 MIDDLEWARE = [
@@ -93,7 +94,10 @@ else:
             'USER': os.environ['MYSQL_UNAME'],
             'PASSWORD': os.environ['MYSQL_PWD'],
             'HOST': os.environ['MYSQL_HOST'],
-            'PORT': os.environ['MYSQL_PORT']
+            'PORT': os.environ['MYSQL_PORT'],
+            'OPTIONS': {
+                'sql_mode': 'traditional',
+            }
         }
     }
 
@@ -160,3 +164,36 @@ REST_FRAMEWORK = {
 }
 
 AWS_S3_BUCKET = os.environ.get('AWS_S3_BUCKET')
+
+# statsd configuration
+STATSD_CLIENT = 'django_statsd.clients.normal'
+
+MIDDLEWARE = [
+    'django_statsd.middleware.GraphiteRequestTimingMiddleware',
+    'django_statsd.middleware.GraphiteMiddleware'
+] + MIDDLEWARE
+
+STATSD_PATCHES = [
+    'django_statsd.patches.db',
+]
+
+
+# logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': os.environ['LOGGING_LEVEL'],
+            'class': 'logging.FileHandler',
+            'filename': os.environ['LOGGING_FILE_PATH'],
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': os.environ['LOGGING_LEVEL'],
+            # 'propagate': True,
+        },
+    },
+}
