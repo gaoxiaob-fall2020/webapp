@@ -10,5 +10,5 @@ python3 manage.py makemigrations
 python3 manage.py migrate
 
 # Run the application
-screen -d -m uwsgi --socket :8001 --module webapp.wsgi
+uwsgi --socket :8001 --module webapp.wsgi --daemonize /opt/aws/amazon-cloudwatch-agent/logs/webapp.log
 echo '******end'
