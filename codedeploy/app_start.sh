@@ -11,3 +11,4 @@ python3 manage.py migrate
 
 # Run the application
 screen -d -m uwsgi --socket :8001 --module webapp.wsgi
+echo '******end'
