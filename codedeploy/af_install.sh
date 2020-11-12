@@ -13,3 +13,7 @@ sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
 # sudo touch /opt/aws/amazon-cloudwatch-agent/logs/webapp.log
 sleep 30
 sudo chown ubuntu:ubuntu /opt/aws/amazon-cloudwatch-agent/logs/webapp.log
+
+
+sudo ln -s /etc/nginx/sites-available/dp_ng.conf /etc/nginx/sites-enabled/
+sudo /etc/init.d/nginx restart

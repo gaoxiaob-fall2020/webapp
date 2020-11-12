@@ -7,6 +7,8 @@ files:
     destination: /home/ubuntu/app
   - source: ./cloudwatch
     destination: /home/ubuntu/cloudwatch
+  - source: ./src/webapp/dp_ng.conf
+    destination: /etc/nginx/sites-available/dp_ng.conf
 
 hooks:
   ApplicationStop:

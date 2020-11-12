@@ -10,4 +10,4 @@ pip3 install -r requirements.txt
 python3 manage.py migrate
 
 # Run the application
-screen -d -m python3 manage.py runserver 0.0.0.0:8000
+screen -d -m uwsgi --socket :8001 --module webapp.wsgi
