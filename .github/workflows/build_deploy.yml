@@ -7,7 +7,7 @@ env:
   CODEDEPLOY_DEPLOY_GROUP_NAME: csye6225-webapp-deployment
   AWS_REGION: us-east-1
 
-on: [pull_request]
+on: [push]
   # push:
   #  branches: [ master ]
 
