@@ -204,4 +204,4 @@
 
     DELETE: /v1/question/<question_id>/answer/<answer_id>/file/<file_id>/
 
-demo7
+demo 7
