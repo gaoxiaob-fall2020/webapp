@@ -184,16 +184,18 @@ LOGGING = {
     'disable_existing_loggers': False,
     'handlers': {
         'file': {
-            'level': os.environ['LOGGING_LEVEL'],
+            'level': os.environ.get('LOGGING_LEVEL', 'DEBUG'),
             'class': 'logging.FileHandler',
-            'filename': os.environ['LOGGING_FILE_PATH'],
+            'filename': os.environ.get('LOGGING_FILE_PATH', 'logs/webapp.log'),
         },
     },
     'loggers': {
         'django': {
             'handlers': ['file'],
-            'level': os.environ['LOGGING_LEVEL'],
+            'level': os.environ.get('LOGGING_LEVEL', 'DEBUG'),
             # 'propagate': True,
         },
     },
 }
+
+AWS_SNS_TOPIC_ARN = os.environ.get('AWS_SNS_TOPIC_ARN')
