@@ -214,18 +214,17 @@ class AnswerDetail(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
-        a.delete()
         # TODO
-        answer_id = serializer.data.get('answer_id')
         sns_msg = {
             'on': 'answer_deleted',
             'question_id': question_id,
             'question_creator_email': request.user.username,
             'question_url': reverse('get_put_del_a_question', args=[question_id], request=request),
             'answer_id': answer_id,
-            'answer_text': serializer.data.get('answer_text'),
+            'answer_text': a.answer_text,
             # 'answer_url': reverse('get_put_del_an_answer', args=[question_id, answer_id], request=request)
         }
+        a.delete()
         print(sns_msg)
         sns.publish(TopicArn=settings.AWS_SNS_TOPIC_ARN, Message=json.dumps(sns_msg))
         return Response(status=status.HTTP_204_NO_CONTENT)
