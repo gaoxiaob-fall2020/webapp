@@ -1,4 +1,5 @@
 # from django.shortcuts import render
+import json
 import time
 
 import boto3
@@ -11,10 +12,13 @@ from rest_framework import status
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
+from rest_framework.reverse import reverse as rest_reverse
 from rest_framework.views import APIView
 
 from .models import Answer, File, Question
 from .serializers import AnswerSerializer, FileSerializer, QuestionSerializer
+
+sns = boto3.client('sns')
 
 
 def get_q(question_id):
@@ -135,6 +139,22 @@ class AnswerList(APIView):
         serializer = AnswerSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(question_id=q.pk, user_id=request.user.pk)
+            # TODO
+            if not settings.TESTING:
+                answer_id = serializer.data.get('answer_id')
+                sns_msg = {
+                    'on': 'question_answered',
+                    'question_id': question_id,
+                    'question_creator_email': request.user.username,
+                    'question_url': rest_reverse('get_put_del_a_question', args=[question_id], request=request),
+                    'answer_id': answer_id,
+                    'answer_text': serializer.data.get('answer_text'),
+                    'answer_url': rest_reverse('get_put_del_an_answer', args=[question_id, answer_id], request=request)
+                }
+                sns.publish(TopicArn=settings.AWS_SNS_TOPIC_ARN,
+                            Message=json.dumps(sns_msg))
+            else:
+                print('Testing - Answer a question')
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -171,6 +191,21 @@ class AnswerDetail(APIView):
         serializer = AnswerSerializer(a, data=request.data)
         if serializer.is_valid():
             serializer.save()
+            # TODO
+            if not settings.TESTING:
+                sns_msg = {
+                    'on': 'answer_updated',
+                    'question_id': question_id,
+                    'question_creator_email': request.user.username,
+                    'question_url': rest_reverse('get_put_del_a_question', args=[question_id], request=request),
+                    'answer_id': answer_id,
+                    'answer_text': serializer.data.get('answer_text'),
+                    'answer_url': rest_reverse('get_put_del_an_answer', args=[question_id, answer_id], request=request)
+                }
+                sns.publish(TopicArn=settings.AWS_SNS_TOPIC_ARN,
+                            Message=json.dumps(sns_msg))
+            else:
+                print('Testing - Update an answer')
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -185,6 +220,21 @@ class AnswerDetail(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
+        # TODO
+        if not settings.TESTING:
+            sns_msg = {
+                'on': 'answer_deleted',
+                'question_id': question_id,
+                'question_creator_email': request.user.username,
+                'question_url': rest_reverse('get_put_del_a_question', args=[question_id], request=request),
+                'answer_id': answer_id,
+                'answer_text': a.answer_text,
+                # 'answer_url': reverse('get_put_del_an_answer', args=[question_id, answer_id], request=request)
+            }
+            sns.publish(TopicArn=settings.AWS_SNS_TOPIC_ARN,
+                        Message=json.dumps(sns_msg))
+        else:
+            print('Testing - Delete an answer')
         a.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -217,7 +267,8 @@ class FileList(APIView):
             s_t = time.time()
             s3.Bucket(settings.AWS_S3_BUCKET).put_object(
                 Key=img.s3_object_name, Body=f)
-            statsd.timing('s3_views_question_n_answer_FileList_question_PUT', (time.time() - s_t) * 1000)
+            statsd.timing(
+                's3_views_question_n_answer_FileList_question_PUT', (time.time() - s_t) * 1000)
             img.save()
             return Response(FileSerializer(img).data, status=status.HTTP_201_CREATED)
 
@@ -232,7 +283,8 @@ class FileList(APIView):
         s_t = time.time()
         s3.Bucket(settings.AWS_S3_BUCKET).put_object(
             Key=img.s3_object_name, Body=f)
-        statsd.timing('s3_views_question_n_answer_FileList_answer_PUT', (time.time() - s_t) * 1000)
+        statsd.timing('s3_views_question_n_answer_FileList_answer_PUT',
+                      (time.time() - s_t) * 1000)
         img.save()
         return Response(FileSerializer(img).data, status=status.HTTP_201_CREATED)
 
@@ -251,8 +303,6 @@ class FileList(APIView):
 
         # Delete an image file from a question/an answer
         if a and (str(a.question.pk) != question_id or str(f.answer.pk) != answer_id):
-            print(str(f.pk) != file_id)
-            print(a.question.pk, f.pk, file_id)
             return Response(
                 {'Detail': "The question, the answer, and the file don\'t match."},
                 status=status.HTTP_400_BAD_REQUEST
@@ -260,9 +310,11 @@ class FileList(APIView):
         s_t = time.time()
         obj = s3.Object(settings.AWS_S3_BUCKET, f.s3_object_name)
         if not answer_id:
-            statsd.timing('s3_views_question_n_answer_FileList_question_DELETE', (time.time() - s_t) * 1000)
+            statsd.timing(
+                's3_views_question_n_answer_FileList_question_DELETE', (time.time() - s_t) * 1000)
         else:
-            statsd.timing('s3_views_question_n_answer_FileList_answer_DELETE', (time.time() - s_t) * 1000)
+            statsd.timing(
+                's3_views_question_n_answer_FileList_answer_DELETE', (time.time() - s_t) * 1000)
         obj.delete()
         f.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
