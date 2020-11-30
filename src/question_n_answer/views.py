@@ -146,6 +146,7 @@ class AnswerList(APIView):
                     'on': 'question_answered',
                     'question_id': question_id,
                     'question_creator_email': request.user.username,
+                    'question_text': q.question_text,
                     'question_url': rest_reverse('get_put_del_a_question', args=[question_id], request=request),
                     'answer_id': answer_id,
                     'answer_text': serializer.data.get('answer_text'),
@@ -180,7 +181,7 @@ class AnswerDetail(APIView):
     # Update a question's answer
     def put(self, request, question_id, answer_id):
         statsd.incr('view_question_n_answer_views_AnswerDetail_PUT')
-        _, a = self.get_q_n_a(question_id, answer_id)
+        q, a = self.get_q_n_a(question_id, answer_id)
         if a.user_id != request.user.id:
             return Response(
                 {
@@ -197,6 +198,7 @@ class AnswerDetail(APIView):
                     'on': 'answer_updated',
                     'question_id': question_id,
                     'question_creator_email': request.user.username,
+                    'question_text': q.question_text,
                     'question_url': rest_reverse('get_put_del_a_question', args=[question_id], request=request),
                     'answer_id': answer_id,
                     'answer_text': serializer.data.get('answer_text'),
@@ -212,7 +214,7 @@ class AnswerDetail(APIView):
     # Delete a question's answer
     def delete(self, request, question_id, answer_id):
         statsd.incr('view_question_n_answer_views_AnswerDetail_DELETE')
-        _, a = self.get_q_n_a(question_id, answer_id)
+        q, a = self.get_q_n_a(question_id, answer_id)
         if a.user_id != request.user.id:
             return Response(
                 {
@@ -226,6 +228,7 @@ class AnswerDetail(APIView):
                 'on': 'answer_deleted',
                 'question_id': question_id,
                 'question_creator_email': request.user.username,
+                'question_text': q.question_text,
                 'question_url': rest_reverse('get_put_del_a_question', args=[question_id], request=request),
                 'answer_id': answer_id,
                 'answer_text': a.answer_text,
