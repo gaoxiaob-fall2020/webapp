@@ -145,7 +145,7 @@ class AnswerList(APIView):
                 sns_msg = {
                     'on': 'question_answered',
                     'question_id': question_id,
-                    'question_creator_email': request.user.username,
+                    'question_creator_email': q.user.username,
                     'question_text': q.question_text,
                     'question_url': rest_reverse('get_put_del_a_question', args=[question_id], request=request),
                     'answer_id': answer_id,
@@ -197,7 +197,7 @@ class AnswerDetail(APIView):
                 sns_msg = {
                     'on': 'answer_updated',
                     'question_id': question_id,
-                    'question_creator_email': request.user.username,
+                    'question_creator_email': q.user.username,
                     'question_text': q.question_text,
                     'question_url': rest_reverse('get_put_del_a_question', args=[question_id], request=request),
                     'answer_id': answer_id,
@@ -227,7 +227,7 @@ class AnswerDetail(APIView):
             sns_msg = {
                 'on': 'answer_deleted',
                 'question_id': question_id,
-                'question_creator_email': request.user.username,
+                'question_creator_email': q.user.username,
                 'question_text': q.question_text,
                 'question_url': rest_reverse('get_put_del_a_question', args=[question_id], request=request),
                 'answer_id': answer_id,
