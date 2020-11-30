@@ -181,7 +181,7 @@ class AnswerDetail(APIView):
     # Update a question's answer
     def put(self, request, question_id, answer_id):
         statsd.incr('view_question_n_answer_views_AnswerDetail_PUT')
-        _, a = self.get_q_n_a(question_id, answer_id)
+        q, a = self.get_q_n_a(question_id, answer_id)
         if a.user_id != request.user.id:
             return Response(
                 {
@@ -214,7 +214,7 @@ class AnswerDetail(APIView):
     # Delete a question's answer
     def delete(self, request, question_id, answer_id):
         statsd.incr('view_question_n_answer_views_AnswerDetail_DELETE')
-        _, a = self.get_q_n_a(question_id, answer_id)
+        q, a = self.get_q_n_a(question_id, answer_id)
         if a.user_id != request.user.id:
             return Response(
                 {
