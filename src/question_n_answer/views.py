@@ -12,7 +12,7 @@ from rest_framework import status
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
-from rest_framework.reverse import reverse
+from rest_framework.reverse import reverse as rest_reverse
 from rest_framework.views import APIView
 
 from .models import Answer, File, Question
@@ -145,13 +145,14 @@ class AnswerList(APIView):
                 'on': 'question_answered',
                 'question_id': question_id,
                 'question_creator_email': request.user.username,
-                'question_url': reverse('get_put_del_a_question', args=[question_id], request=request),
+                'question_url': rest_reverse('get_put_del_a_question', args=[question_id], request=request),
                 'answer_id': answer_id,
                 'answer_text': serializer.data.get('answer_text'),
-                'answer_url': reverse('get_put_del_an_answer', args=[question_id, answer_id], request=request)
+                'answer_url': rest_reverse('get_put_del_an_answer', args=[question_id, answer_id], request=request)
             }
             print(sns_msg)
-            sns.publish(TopicArn=settings.AWS_SNS_TOPIC_ARN, Message=json.dumps(sns_msg))
+            sns.publish(TopicArn=settings.AWS_SNS_TOPIC_ARN,
+                        Message=json.dumps(sns_msg))
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -193,13 +194,14 @@ class AnswerDetail(APIView):
                 'on': 'answer_updated',
                 'question_id': question_id,
                 'question_creator_email': request.user.username,
-                'question_url': reverse('get_put_del_a_question', args=[question_id], request=request),
+                'question_url': rest_reverse('get_put_del_a_question', args=[question_id], request=request),
                 'answer_id': answer_id,
                 'answer_text': serializer.data.get('answer_text'),
-                'answer_url': reverse('get_put_del_an_answer', args=[question_id, answer_id], request=request)
+                'answer_url': rest_reverse('get_put_del_an_answer', args=[question_id, answer_id], request=request)
             }
             print(sns_msg)
-            sns.publish(TopicArn=settings.AWS_SNS_TOPIC_ARN, Message=json.dumps(sns_msg))
+            sns.publish(TopicArn=settings.AWS_SNS_TOPIC_ARN,
+                        Message=json.dumps(sns_msg))
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -219,14 +221,15 @@ class AnswerDetail(APIView):
             'on': 'answer_deleted',
             'question_id': question_id,
             'question_creator_email': request.user.username,
-            'question_url': reverse('get_put_del_a_question', args=[question_id], request=request),
+            'question_url': rest_reverse('get_put_del_a_question', args=[question_id], request=request),
             'answer_id': answer_id,
             'answer_text': a.answer_text,
             # 'answer_url': reverse('get_put_del_an_answer', args=[question_id, answer_id], request=request)
         }
         a.delete()
         print(sns_msg)
-        sns.publish(TopicArn=settings.AWS_SNS_TOPIC_ARN, Message=json.dumps(sns_msg))
+        sns.publish(TopicArn=settings.AWS_SNS_TOPIC_ARN,
+                    Message=json.dumps(sns_msg))
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
