@@ -200,7 +200,7 @@ class AnswerDetail(APIView):
                     'question_creator_email': q.user.username,
                     'question_text': q.question_text,
                     'question_url': rest_reverse('get_put_del_a_question', args=[question_id], request=request),
-                    'answer_id': answer_id,
+                    'answer_id': serializer.data.get('answer_id'),
                     'answer_text': serializer.data.get('answer_text'),
                     'answer_url': rest_reverse('get_put_del_an_answer', args=[question_id, answer_id], request=request)
                 }
